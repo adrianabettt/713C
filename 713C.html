@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Computacional - Profª Adriana</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        .quiz-container { width: 650px; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); overflow: hidden; position: relative; }
+        
+        .header { background: #2c3e50; color: white; padding: 12px; text-align: center; font-weight: bold; font-size: 0.9em; }
+        .progress-bar { height: 5px; background: #ecf0f1; width: 100%; }
+        .progress-fill { height: 100%; background: #3498db; width: 0%; transition: 0.5s; }
+        
+        .content { padding: 25px; min-height: 250px; text-align: center; }
+        .question { font-size: 1.1em; color: #2c3e50; margin-bottom: 20px; font-weight: bold; }
+        .options { display: grid; gap: 10px; }
+        .option-btn { padding: 12px; background: #f8f9fa; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; transition: 0.2s; text-align: left; font-size: 0.9em; }
+        .option-btn:hover { background: #e9ecef; border-color: #3498db; }
+        
+        /* Modal de Feedback */
+        .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10; color: white; text-align: center; }
+        .modal h2 { font-size: 2em; margin: 0; }
+        
+        .footer { background: #f8f9fa; padding: 10px; text-align: center; font-size: 0.7em; color: #7f8c8d; border-top: 1px solid #eee; }
+        .final-score { font-size: 1.5em; font-weight: bold; color: #2c3e50; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div class="header">Quiz: Organizando Dados - Habilidade EF07CO03)</div>
+    <div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
+    
+    <div id="quiz-body" class="content">
+        <div id="question-text" class="question">Carregando pergunta...</div>
+        <div id="options-container" class="options"></div>
+    </div>
+
+    <div id="feedback-modal" class="modal">
+        <h2 id="feedback-title"></h2>
+        <p id="feedback-msg"></p>
+        <button onclick="nextQuestion()" style="padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Continuar</button>
+    </div>
+
+    <div class="footer">Disciplina: Informática - Profª Adriana Bett Terebinto - São Lourenço do Oeste/SC | © 2026</div>
+</div>
+
+<script>
+    const questions = [
+        { q: "Qual é o primeiro passo para transformar um problema em programa?", a: ["Programar o código", "Entender o problema", "Testar e melhorar"], c: 1 },
+        { q: "Se eu preciso guardar as notas de 30 alunos, qual a melhor estrutura?", a: ["Uma única variável", "Um vetor (lista)", "Nenhuma estrutura"], c: 1 },
+        { q: "O que significa 'Refinar' um programa?", a: ["Apagar o código todo", "Tornar o programa melhor após testes", "Copiar de um colega"], c: 1 },
+        { q: "Em qual passo decidimos quais informações precisamos guardar?", a: ["Organizar os dados", "Criar o algoritmo", "Apresentação"], c: 0 },
+        { q: "Para mostrar os dados de um planeta (nome, clima, cor), usamos um:", a: ["Vetor de números", "Registro (Objeto)", "Algoritmo simples"], c: 1 },
+        { q: "O 'Algoritmo' serve para definir:", a: ["As cores do programa", "Os passos que o programa vai seguir", "O nome do professor"], c: 1 },
+        { q: "O que podemos melhorar no 'Refinamento visual'?", a: ["Os cálculos matemáticos", "As cores e alertas coloridos", "O tamanho do teclado"], c: 1 },
+        { q: "Na apresentação, além de dizer o que o programa resolve, o que mais explicamos?", a: ["Como organizamos os dados", "Quanto tempo demorou", "Qual o melhor aluno"], c: 0 },
+        { q: "Por que testamos um programa com 'casos extremos'?", a: ["Para gastar tempo", "Para garantir que ele funciona em qualquer situação", "Para ver se o computador desliga"], c: 1 },
+        { q: "A computação ajuda em outras áreas (Matemática, Ciências)?", a: ["Não, só serve para jogos", "Sim, ajuda a resolver problemas de qualquer área", "Apenas em Matemática"], c: 1 }
+    ];
+
+    let currentQ = 0;
+    let score = 0;
+
+    function loadQuestion() {
+        if (currentQ < questions.length) {
+            const q = questions[currentQ];
+            document.getElementById('question-text').innerText = q.q;
+            const container = document.getElementById('options-container');
+            container.innerHTML = "";
+            q.a.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(i);
+                container.appendChild(btn);
+            });
+            document.getElementById('progress').style.width = (currentQ / questions.length) * 100 + "%";
+        } else {
+            showFinalResult();
+        }
+    }
+
+    function checkAnswer(choice) {
+        const modal = document.getElementById('feedback-modal');
+        const title = document.getElementById('feedback-title');
+        const correct = questions[currentQ].c;
+
+        if (choice === correct) {
+            score++;
+            title.innerText = "CORRETO!";
+            modal.style.background = "#27ae60";
+        } else {
+            title.innerText = "ERROU!";
+            modal.style.background = "#e74c3c";
+        }
+        modal.style.display = "flex";
+    }
+
+    function nextQuestion() {
+        document.getElementById('feedback-modal').style.display = "none";
+        currentQ++;
+        loadQuestion();
+    }
+
+    function showFinalResult() {
+        const body = document.getElementById('quiz-body');
+        const notaFinal = score; // Como são 10 questões, cada uma vale 1.
+        document.getElementById('progress').style.width = "100%";
+        
+        let msg = notaFinal >= 6 ? "Parabéns! Você domina a Habilidade EF07CO03." : "Continue estudando para melhorar seus algoritmos!";
+        
+        body.innerHTML = `
+            <div class="final-score">Sua Nota: ${notaFinal.toFixed(1)} / 10</div>
+            <p>${msg}</p>
+            <button onclick="location.reload()" style="padding: 10px; cursor:pointer;">Reiniciar Quiz</button>
+        `;
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
